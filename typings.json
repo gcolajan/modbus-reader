@@ -1,0 +1,5 @@
+{
+    "dependencies": {
+        "modbus-serial": "github:yaacov/node-modbus-serial/index.d.ts#a9118c8859ff3b29d9d0bb0bbd83744a325594e0"
+    }
+}

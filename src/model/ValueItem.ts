@@ -1,4 +1,4 @@
-import { SupportedType, TypeBufferHelper } from '../helpers/TypeBufferHelper';
+import { SupportedType, TypeBufferHelper } from './TypeBufferHelper';
 import { Controller } from './Controller';
 
 /** One native register is 2 bytes */
@@ -17,7 +17,7 @@ export interface ValueItemInfo {
 
 export class ValueItem implements ValueItemInfo {
 	private _controller: Controller;
-	private _id: string | number;
+	private _id: string | number | undefined;
 	private _label: string;
 	private _address: number;
 	private _type: SupportedType;
@@ -28,8 +28,8 @@ export class ValueItem implements ValueItemInfo {
 	get controller(): Controller { return this._controller; }
 
 	/** Mapping of the metric/register */
-	get id(): string | number { return this._id; }
-	set id(value: string | number) { this._id = value; }
+	get id(): string | number | undefined { return this._id; }
+	set id(value: string | number | undefined) { this._id = value; }
 
 	/** Label of the register */
 	get label(): string { return this._label; }

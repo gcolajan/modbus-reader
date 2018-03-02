@@ -1,13 +1,13 @@
 import { expect } from 'chai';
-import { Register } from '../../src/model/Register';
 import { Controller, ControllerConfiguration } from '../../src/model/Controller';
+import { ValueItem } from '../../src/model/ValueItem';
 
 describe('model.Controller', () => {
 	const configuration: ControllerConfiguration = {
 		address: 'address',
 		name: 'name',
 		port: 502,
-		registers: null,
+		valueItemInfos: null,
 		slaveId: 0
 	};
 
@@ -20,7 +20,7 @@ describe('model.Controller', () => {
 			expect(controller.address).to.equal(configuration.address);
 			expect(controller.name).to.equal(configuration.name);
 			expect(controller.port).to.equal(configuration.port);
-			expect(controller.registers).to.deep.equal([]);
+			expect(controller.valueItems).to.deep.equal([]);
 			expect(controller.slaveId).to.equal(configuration.slaveId);
 		});
 
@@ -33,27 +33,27 @@ describe('model.Controller', () => {
 		});
 	});
 
-	describe('addRegister', () => {
-		const register = new Register({label: 'label', address: 0, type: 'INT32', unit: 'T', coefficient: -1});
+	describe('addValueItem', () => {
+		let controller: Controller;
+		let valueItem: ValueItem;
 
-		it('Should add a new register', () => {
-			// Arrange
-			const controller = new Controller(configuration);
+		beforeEach(() => {
+			controller =  new Controller(configuration);
+			valueItem = new ValueItem({label: 'label', address: 0, type: 'INT32', unit: 'T', coefficient: -1, recurrence: "* * * * * *"}, controller);
+		});
 
+		it('Should add a new value item', () => {
 			// Act
-			controller.addRegister(register);
+			controller.addValueItem(valueItem);
 
 			// Assert
-			expect(controller.registers).to.contain(register);
-			expect(controller.registers).to.have.lengthOf(1);
+			expect(controller.valueItems).to.contain(valueItem);
+			expect(controller.valueItems).to.have.lengthOf(1);
 		});
 
 		it('Should always made the controller not ready for read operation', () => {
-			// Arrange
-			const controller = new Controller(configuration);
-
 			// Act
-			controller.addRegister(register);
+			controller.addValueItem(valueItem);
 
 			// Assert
 			expect(controller.readingsReady).to.be.false;
@@ -61,13 +61,12 @@ describe('model.Controller', () => {
 
 		it('Should not add a register twice', () => {
 			// Arrange
-			const controller = new Controller(configuration);
-			controller.addRegister(register);
+			controller.addValueItem(valueItem);
 
 			// Act && Assert
-			expect(() => controller.addRegister(register)).to.throw;
-			expect(controller.registers).to.have.lengthOf(1);
-			expect(controller.registers).to.contain(register);
+			expect(() => controller.addValueItem(valueItem)).to.throw;
+			expect(controller.valueItems).to.have.lengthOf(1);
+			expect(controller.valueItems).to.contain(valueItem);
 		});
 	});
 

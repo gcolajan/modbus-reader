@@ -14,10 +14,10 @@ export class ModbusReader {
     private readonly _fake: boolean;
     private readonly _providers: Map<Controller, IProvider>;
     private readonly _deferredReadings: Map<Controller, ReadingOperation[]>;
-    private readonly _deferredTasks: Map<Controller, NodeJS.Timer>;
+    private readonly _deferredTasks: Map<Controller, NodeJS.Timer | null>;
     private _scheduledJobs: Job[];
     private _config: ReadonlyArray<ControllerConfiguration>;
-    private _controllers: Controller[];
+    private _controllers!: Controller[];
 
     get fake(): boolean { return this._fake; }
     get started(): boolean { return this._scheduledJobs.length > 0; }
@@ -96,6 +96,10 @@ export class ModbusReader {
     private async fetch(controller: Controller, readingOperations: ReadingOperation[]): Promise<void> {
         // Bundling reading operation by controller
         const readings = this._deferredReadings.get(controller);
+        if (!readings) {
+            throw new Error("Deferred reading doesn't contains required controller");
+        }
+
         readings.push(...readingOperations);
 
         // Fetching previous untriggered timer
@@ -107,6 +111,9 @@ export class ModbusReader {
         // Creating and referencing a deferred action to truly fetch the data 
         const timer = setTimeout(async () => {
             const provider = this._providers.get(controller);
+            if (!provider) {
+                throw new Error("No provider is instanciated for this controller");
+            }
             await provider.connect();
 
             for (const reading of readings) {
@@ -137,7 +144,7 @@ export class ModbusReader {
             const controller = new Controller(c);
             c.valueItemInfos.forEach(v => {
                 const valueItem = new ValueItem(v, controller);
-                controller.addRegister(valueItem);
+                controller.addValueItem(valueItem);
             });
             controller.generateReadings();
             return controller;

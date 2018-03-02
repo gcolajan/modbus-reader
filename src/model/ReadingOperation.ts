@@ -1,5 +1,5 @@
 import { ValueItem } from './ValueItem';
-import { TypeBufferHelper } from '../helpers/TypeBufferHelper';
+import { TypeBufferHelper } from './TypeBufferHelper';
 
 /** Maximum theoric of register that could be read at once */
 export const MAX_REGISTERS = 123;

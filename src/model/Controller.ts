@@ -21,7 +21,7 @@ export class Controller {
 	private readonly _valueItems: Array<ValueItem>;
 	private readonly _maxDefer: number;
 	private readonly _readingsByRecurrence: Map<string, ReadingOperation[]>;
-	private _readings: Array<ReadingOperation>;
+	private _readings: ReadingOperation[];
 	private _readingsReady: boolean;
 	
 	/** */
@@ -61,18 +61,19 @@ export class Controller {
 		this._port = conf.port;
 		this._slaveId = conf.slaveId;
 		this._valueItems = new Array();
+		this._readings = [];
 		this._readingsReady = true;
-		this._maxDefer = conf.maxDefer | MAX_DEFER;
+		this._maxDefer = conf.maxDefer || MAX_DEFER;
 		this._readingsByRecurrence = new Map();
 	}
 
 	/** Adds the register to the list if not already present */
-	addRegister(register: ValueItem): void {
-		if (this.valueItems.indexOf(register) !== -1) {
+	addValueItem(valueItem: ValueItem): void {
+		if (this.valueItems.indexOf(valueItem) !== -1) {
 			throw new Error('Register already bound to current controller');
 		}
 
-		this.valueItems.push(register);
+		this.valueItems.push(valueItem);
 		this._readingsReady = false;
 	}
 
@@ -89,7 +90,13 @@ export class Controller {
 		const valueItemByrecurrence = new Map<string, ValueItem[]>();
 		const recurrences = [...new Set(this._valueItems.map(v => v.recurrence))];
 		recurrences.forEach(r => valueItemByrecurrence.set(r, []));
-		this._valueItems.forEach(v => valueItemByrecurrence.get(v.recurrence).push(v));
+		this._valueItems.forEach(v => {
+			const valueItems = valueItemByrecurrence.get(v.recurrence);
+			if (!valueItems) {
+				throw new Error("Unable to find this recurrence");
+			}
+			valueItems.push(v);
+		});
 
 		this._readings = [];
 		for (let [rec, valueItems] of valueItemByrecurrence) {

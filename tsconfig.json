@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
-    "strict": false,
-    "typeRoots": ["node_modules/@types"],
+    "module": "none",
+    "strict": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
     "sourceMap": false,
+    "declaration": true,
     "outDir": "build"
   },
   "include": [
-    "src/**/*"
+    "typings/index.d.ts",
+    "src/index.ts"
   ],
   "exclude": [
     "node_modules"
