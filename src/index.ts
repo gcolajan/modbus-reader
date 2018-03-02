@@ -1,2 +1,4 @@
 import { ModbusReader } from './ModbusReader';
-export { ModbusReader };
+import { Controller } from './model/Controller';
+import { ValueItem } from './model/ValueItem';
+export { ModbusReader, Controller, ValueItem };
