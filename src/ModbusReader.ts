@@ -92,6 +92,14 @@ export class ModbusReader {
         this.clear();
     }
 
+    *getAllValueItems(): IterableIterator<ValueItem> {
+        for (const controller of this._controllers) {
+            for (const valueItem of controller.valueItems) {
+                yield valueItem;
+            }
+        }
+    }
+
     /** Fetching data with a debounce function to prevent establishing more than required TCP connections */
     private async fetch(controller: Controller, readingOperations: ReadingOperation[]): Promise<void> {
         // Bundling reading operation by controller
@@ -114,15 +122,27 @@ export class ModbusReader {
             if (!provider) {
                 throw new Error("No provider is instanciated for this controller");
             }
-            await provider.connect();
 
-            for (const reading of readings) {
-                this.read(provider, reading);
+            try {
+                await provider.connect();
+            }
+            catch (err) {
+                console.warn(`An error has occurred trying to reach ${controller.name}: ${err.message}`);
             }
 
-            this._deferredTasks.set(controller, null);
-            this._deferredReadings.set(controller, []);
-            provider.close();
+            try {
+                for (const reading of readings) {
+                    await this.read(provider, reading);
+                }
+            }
+            catch (err) {
+                console.warn(`An error has occurred reading from ${controller.name}: ${err.message}`);
+            }
+            finally {
+                this._deferredTasks.set(controller, null);
+                this._deferredReadings.set(controller, []);
+                provider.close();
+            }
         }, MAX_DEFER);
 
         this._deferredTasks.set(controller, timer);
